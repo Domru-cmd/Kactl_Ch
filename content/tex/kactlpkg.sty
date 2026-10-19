@@ -1,0 +1,376 @@
+% 本文件包含 KACTL 的 LaTeX 宏
+% 许可:CC0
+\ProvidesPackage{kactlpkg}
+
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}           % Encoding UTF-8
+\else
+  % 中文支持(需要 XeLaTeX)
+  \usepackage{xeCJK}
+  \setCJKmainfont{Noto Serif CJK SC}
+  \setCJKsansfont{Noto Sans CJK SC}
+  \setCJKmonofont{Noto Sans CJK SC}
+\fi
+\usepackage{listings}                   % 源码排版
+\usepackage{framed}                     % 源码排版
+\usepackage[a4paper,landscape,hmargin={0.5cm,0.5cm},vmargin={1.0cm,0.4cm}]{geometry}
+\usepackage{multicol}                   % 分栏排版
+\usepackage{fancyhdr}                   % 页眉页脚
+\usepackage{amsbsy, amssymb, amsmath}   % 数学符号
+\usepackage{tocloft}                    % 自定义目录
+\usepackage{titletoc}                   % 目录样式控制
+\usepackage{ifthen}                     % LaTeX 条件编程
+\usepackage{courier}                    % 粗体打字机字体
+\usepackage{graphicx}                   % 旋转页码
+\usepackage{fix-cm}                     % 大号字体
+\usepackage{paralist}                   % 紧凑列表
+\usepackage[inline]{enumitem}           % 水平列表
+\usepackage[parfill]{parskip}           % 紧凑列表
+\usepackage[dvipsnames]{xcolor}
+\usepackage[normalem]{ulem}
+\usepackage[hidelinks]{hyperref}        % 可点击目录
+
+% 配置命令
+\newcommand{\subtitle}[1]{
+	\def\@subtitle{#1}
+}
+\newcommand{\team}[2]{
+	\def\@teamname{#1}
+	\def\@teammembers{#2}
+}
+\newcommand{\contest}[2]{
+	\def\@contestname{#1}
+	\def\@contestdate{#2}
+}
+\newcommand{\university}[3]{
+	\def\@unishort{#1}
+	\def\@unilong{#2}
+	\def\@unilogo{#3}
+}
+
+\newcommand{\enablecolors}{
+	\lstset{basicstyle=\footnotesize\ttfamily\color{mygreen}}
+	\lstset{commentstyle=\color{darkgray}\normalfont\itshape}
+	\lstset{keywordstyle=\color{myblue}}
+	\lstset{identifierstyle=\color{black}}
+}
+
+% 一些默认配置
+\subtitle{{\tiny new}KACTL}
+\title{KTH Algorithm Competition Template Library}
+\newcommand{\PDFColor}{0}
+\def\@builddir{build}
+
+\def\today{\number\year-\ifthenelse{\number\month<10}{0}{}\number\month-\ifthenelse{\number\day<10}{0}{}\number\day} % 把 \today 定义为 YYYY-MM-DD
+
+\renewcommand{\maketitle}[2]{
+	\begin{center}
+		{\Huge \@title}\\
+		{\huge \@subtitle{} version #2}\\[0.1cm]
+		{\Huge \textsc{#1}}
+	\end{center}
+}
+
+% 清理以往失败运行留下的临时文件
+\AtBeginDocument{\immediate\write18{rm -f \@builddir/header.tmp}}
+\AtEndDocument{\immediate\write18{rm -f \@builddir/header.tmp}\immediate\write18{rm -f \@builddir/header2.tmp}\immediate\write18{rm -f \@builddir/kactl.tmp}}
+
+% 在每页顶部列出本页收录的源文件。为了记录这些信息,我们使用 eTeX marks。
+% (不能直接把数据追加到页眉,因为 TeX 异步输出页面,使用 multicol 时尤其明显。)
+% 没有命令能取得一页上设置的全部 mark,所以只取最后一个,
+% 并收录到它为止所有尚未收录的文件。多数情况下 \splitbotmark 会给出正确的
+% mark,少数情况下会出错,我们就退回 \botmark 尽力而为。
+% 另外,LaTeX 的字符串处理很糟糕,所以实际处理都放在 Python 里做,
+% 全局状态存放在 header.tmp。
+\newmarks\hdrmark
+\pagestyle{fancy}
+\renewcommand{\headrulewidth}{0pt}
+\headheight 25pt
+\lhead{\@unishort}
+\chead{\immediate\write18{python3 content/tex/preprocessor.py --print-header "\splitbotmarks\hdrmark|\botmarks\hdrmark" -o \@builddir/header2.tmp}\immediate\input{\@builddir/header2.tmp}}
+\rhead{\thepage}
+%\lhead{}\chead{\thepage}\rhead{}
+\lfoot{}\cfoot{}\rfoot{}
+\fancyheadoffset{0pt}
+\fancyfootoffset{0pt}
+\setlength\headsep{5pt}
+
+\renewcommand\chapter{
+	\global\@topnum\z@
+	\secdef
+	\@chapter
+	\@schapter
+}
+
+% 不把附录加入目录
+% 目前这会使附录章节的局部目录部分失效
+\newboolean{appendixmode}
+\setboolean{appendixmode}{false}
+\let\Oldaddtoc\addcontentsline
+\renewcommand{\addcontentsline}[3]{
+	\ifthenelse{
+		\boolean{appendixmode}\and\equal{#1}{toc}
+	}{}{\Oldaddtoc{#1}{#2}{#3}}
+}
+
+% 重定义 appendix
+\renewcommand\appendix{
+	% 把章节计数器改为 A,B,C,...
+	\setcounter{tocdepth}{8}
+	\setcounter{chapter}{0}
+	\def\thechapter{\Alph{chapter}}
+	% 切换到上面定义的 appendixmode(禁用目录条目)
+	\setboolean{appendixmode}{true}
+	\clearpage
+}
+
+\def\@makechapterhead#1{
+
+	\parindent \z@ \raggedright \normalfont
+		\interlinepenalty\@M
+	{\underline{\huge \bfseries #1} }
+	\ifnum \c@secnumdepth >\m@ne
+		{\huge\bfseries (\thechapter) \par\nobreak }
+	\fi
+	\startcontents[chapters]
+}
+
+\renewcommand\section{\@startsection {section}{1}{\z@}%
+                                   {-0.5ex \@plus -1ex \@minus -.2ex}%
+                                   {.4ex}%
+                                   {\normalfont\LARGE\bfseries}}
+
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}
+	{1ex\@plus -1ex \@minus -.3ex}
+	{.2ex}
+	{\normalfont\large\bfseries}}
+
+\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}
+	{1ex\@plus -1ex \@minus -.3ex}
+	{1ex \@plus .2ex}
+	{\normalfont\large\bfseries}}
+
+% 局部目录样式
+\titlecontents{localsection}[1.5em]{\small}{}
+	{\small}{\titlerule*[0.8em]{.}\contentspage}
+\titlecontents{localsubsection}[3.8em]{\small}{}
+	{\small}{\titlerule*[0.8em]{.}\contentspage}
+
+% 主目录样式
+\renewcommand{\chaptermark}[1]{\markboth{\emph{ #1}}{}}
+\renewcommand{\cftbeforetoctitleskip}{-45pt}
+\renewcommand{\cftaftertoctitleskip}{10pt}
+\renewcommand{\cftbeforechapskip}{11pt}
+\renewcommand\cftchapfont{\large\bfseries}
+\renewcommand{\cftdotsep}{4.5}
+
+% 合适的 ^ 与 ~
+\newcommand*{\caret}{%
+  \begingroup
+    \fontencoding{T1}%
+    \fontfamily{pcr}% Courier
+    \selectfont
+    \string^%
+  \endgroup
+}
+\renewcommand*{\tilde}{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}
+% 在 \begin{document} 时再次重定义,确保覆盖 amsmath 的 \tilde(文本模式可用的波浪号)
+\AtBeginDocument{\renewcommand*{\tilde}{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}}
+% 源码中的 ~(独立命令,避免与其它宏包的 \tilde 冲突)
+\newcommand*{\lsttilde}{\raise.17ex\hbox{$\scriptstyle\mathtt{\sim}$}}
+
+% 更粗的 {},与 () 更易区分
+% 会让 pdf 编译时间增加 5-10%,但应该值得?
+\newcommand*{\nicelbrace}{%
+  \begingroup
+    \fontencoding{T1}%
+    \fontfamily{pcr}% Courier
+    \selectfont
+	\scalebox{1.5}[1]{\color{black!80}{\{}}%
+  \endgroup
+}
+\newcommand*{\nicerbrace}{%
+  \begingroup
+    \fontencoding{T1}%
+    \fontfamily{pcr}% Courier
+    \selectfont
+	\scalebox{1.5}[1]{\color{black!80}{\}}}%
+  \endgroup
+}
+
+\definecolor{mygreen}{HTML}{007000}
+\definecolor{myblue}{HTML}{0000dd}
+
+% 配置源码排版
+\lstset{language=C++}
+\lstset{morekeywords={alignas,alignof}}
+\lstset{deletedirectives={line}}
+\lstset{frame=t}
+\lstset{tabsize=2}
+\lstset{showstringspaces=false}
+\lstset{breaklines=true}
+\lstset{basicstyle=\footnotesize\ttfamily}
+\lstset{commentstyle=\normalfont\itshape}
+\lstset{literate={^}{\caret}{1} {~}{\lsttilde}{1} {\{}{\nicelbrace}{1} {\}}{\nicerbrace}{1}}
+\lstset{emptylines=*1}
+\lstset{inputencoding=utf8}
+\lstset{aboveskip=3pt}
+\lstset{belowskip=2pt}
+
+\lstdefinelanguage{raw}{} % raw 语言,无关键字。
+
+\setlength{\columnseprule}{0.5pt} % 分栏分隔线宽
+\setlength{\columnsep}{10pt} % 分栏间距
+\setcounter{tocdepth}{1} % 目录深度
+
+\ifPDFTeX
+	\pdfsuppresswarningpagegroup=1
+\fi
+
+\newcommand{\maketeampage}{
+	\pagestyle{empty}
+	\setcounter{page}{0}
+	\begin{center}
+		\strut % Magic
+		\vspace{3cm}\\
+		\includegraphics[width=3cm]{\@unilogo}\\
+		{\fontsize{25}{30}\selectfont \@unilong\\}
+		{\fontsize{60}{60}\selectfont \@teamname\\}
+		\vspace{0.5cm}
+		{\huge \@teammembers\\}
+		\vfill
+		{\fontsize{21}{25}\selectfont \@contestname}\\
+		\vspace{0.5cm}
+		{\huge \@contestdate}\\
+		\vspace{1cm}
+	\end{center}
+	\clearpage
+	\pagestyle{fancy}
+}
+
+\newcommand{\kactlref}[1]{
+	\ifthenelse{\boolean{appendixmode}}{}{
+		\ifnum \value{section} > 0
+			\addcontentsline{ptc}{subsection}{\texttt{#1}\hspace{0.2em}}
+		\else
+			\addcontentsline{ptc}{section}{\texttt{#1}\hspace{0.2em}}
+		\fi
+	}
+	\marks\hdrmark{#1}
+}
+
+% 类似 \needspace,但会把底部挤满。
+\newcommand{\myneedspace}[1]{%
+  \begingroup
+    \setlength{\dimen@}{#1}%
+    \vskip\dimen@
+    \penalty 9999%
+    \vskip -\dimen@
+    \vskip\z@skip
+  \endgroup
+}
+
+\newcommand{\kactlimport}[2][]{ % 使用空的默认参数
+	\leftcaption{}\rightcaption{}
+	\setboolean{hasdescription}{false}
+	\setboolean{hasusage}{false}
+	\setboolean{hastime}{false}
+	\setboolean{hasmemory}{false}
+	\setboolean{hasleftcaption}{false}
+	\myneedspace{3\baselineskip}
+	\penalty-100
+	{\large #2}
+	\immediate\write18{rm -f \@builddir/kactl.tmp} % 失败时不要包含旧的 kactl.tmp。
+	\immediate\write18{python3 content/tex/preprocessor.py -i "\@kactldir/#2" -o \@builddir/kactl.tmp #1}
+	\immediate\input{\@builddir/kactl.tmp}
+}
+
+\newcommand{\import}[1]{
+	\input{"\@kactldir/#1"}
+}
+
+\newcommand{\kactlcontentdir}[1]{
+	\def\@kactlbasedir{#1}
+	\def\@kactldir{#1}
+}
+\kactlcontentdir{.}
+
+\newcommand{\kactlchapter}[1]{
+	\def\@kactldir{\@kactlbasedir/#1}
+	\input{"\@kactldir/chapter.tex"}
+	\def\@kactldir{\@kactlbasedir}
+}
+
+\newcommand{\kactlerror}[1]{
+	\PackageError{kactlpkg}{#1}{}
+}
+
+\newcommand{\kactlwarning}[1]{
+	\PackageWarning{kactlpkg}{#1}
+}
+
+\newboolean{hasleftcaption}
+\newcommand{\leftcaption}[1]{
+	\def\@leftcaption{#1}
+	\setboolean{hasleftcaption}{true}
+}
+\leftcaption{}
+\setboolean{hasleftcaption}{false}
+
+\newcommand{\rightcaption}[1]{
+	\def\@rightcaption{#1}
+}
+\rightcaption{}
+
+\newboolean{hasdescription}
+\newcommand{\defdescription}[1]{
+	\def\@defdescription{#1}
+	\setboolean{hasdescription}{true}
+}
+\defdescription{}
+\setboolean{hasdescription}{false}
+
+\newboolean{hasusage}
+\newcommand{\defusage}[1]{
+	\def\@defusage{\texttt{#1}}
+	\setboolean{hasusage}{true}
+}
+\defusage{}
+\setboolean{hasusage}{false}
+
+\newboolean{hastime}
+\newcommand{\deftime}[1]{
+	\def\@deftime{#1}
+	\setboolean{hastime}{true}
+}
+\deftime{}
+\setboolean{hastime}{false}
+
+\newboolean{hasmemory}
+\newcommand{\defmemory}[1]{
+	\def\@defmemory{#1}
+	\setboolean{hasmemory}{true}
+}
+\defmemory{}
+\setboolean{hasmemory}{false}
+
+
+\newcommand{\codeheader}[2]{
+	{\par\noindent\footnotesize{\textbf{#1:} #2\par}}
+}
+
+\long\def\@makecaption#1#2{
+	\vspace{-3pt}
+	\ifthenelse{\boolean{hasdescription}}{\codeheader{描述}{\@defdescription}}{}
+	\ifthenelse{\boolean{hasusage}}{\codeheader{用法}{\@defusage}}{}
+	\ifthenelse{\boolean{hasmemory}}{\codeheader{内存}{\@defmemory}}{}
+	\ifthenelse{\boolean{hastime}}{\codeheader{时间}{\@deftime}}{}
+	\ifthenelse{\boolean{hasleftcaption}}{\vspace{0pt}}{\vspace{-5pt}}
+	\tiny
+	\texttt{\@leftcaption} \hfill \@rightcaption
+}
+
+\newcommand{\bigo}[1] {\ensuremath{\mathcal{O} \left( #1 \right)}}
+
+\newcommand{\hardcolumnbreak}{\vfill\null\columnbreak}

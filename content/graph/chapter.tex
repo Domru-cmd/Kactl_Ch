@@ -1,0 +1,60 @@
+\chapter{图论}
+
+\section{基础}
+	\kactlimport{BellmanFord.h}
+	\kactlimport{FloydWarshall.h}
+	\kactlimport{TopoSort.h}
+
+\section{网络流}
+	\kactlimport{PushRelabel.h}
+	\kactlimport{MinCostMaxFlow.h}
+	\kactlimport{EdmondsKarp.h}
+	% \kactlimport{Dinic.h}
+	\kactlimport{MinCut.h}
+	\kactlimport{GlobalMinCut.h}
+	\kactlimport{GomoryHu.h}
+
+\section{匹配}
+	\kactlimport{HopcroftKarp.h}
+	\kactlimport{DFSMatching.h}
+	\kactlimport{MinimumVertexCover.h}
+	\kactlimport{WeightedMatching.h}
+	\kactlimport{GeneralMatching.h}
+
+\section{DFS 算法}
+	\kactlimport{SCC.h}
+	\kactlimport{BiconnectedComponents.h}
+	\kactlimport{2sat.h}
+	\kactlimport{EulerWalk.h}
+
+\section{染色}
+	\kactlimport{EdgeColoring.h}
+
+\section{启发式}
+	\kactlimport{MaximalCliques.h}
+	\kactlimport{MaximumClique.h}
+	\kactlimport{MaximumIndependentSet.h}
+
+\section{树}
+	\kactlimport{BinaryLifting.h}
+	\kactlimport{LCA.h}
+	\kactlimport{CompressTree.h}
+	\kactlimport{HLD.h}
+	\kactlimport{LinkCutTree.h}
+	\kactlimport{DirectedMST.h}
+
+\section{数学}
+	\subsection{生成树个数}
+		% 即矩阵树定理。
+		% 来源:https://en.wikipedia.org/wiki/Kirchhoff%27s_theorem
+		% 测试:stress-tests/graph/matrix-tree.cpp
+		构造 $N\times N$ 矩阵 \texttt{mat},对每条边 $a \rightarrow b \in G$,做
+		\texttt{mat[a][b]--, mat[b][b]++}($G$ 为无向图时再做 \texttt{mat[b][a]--, mat[a][a]++})。
+		删去第 $i$ 行与第 $i$ 列并求行列式,即得根在 $i$ 的有向生成树个数
+		(若 $G$ 无向,删任意一行与任意一列)。
+
+	\subsection{Erdős–Gallai 定理}
+		% 来源:https://en.wikipedia.org/wiki/Erd%C5%91s%E2%80%93Gallai_theorem
+		% 测试:stress-tests/graph/erdos-gallai.cpp
+		存在节点度数 $d_1 \ge \dots \ge d_n$ 的简单图,当且仅当 $d_1 + \dots + d_n$ 为偶数且对每个 $k = 1\dots n$,
+		\[ \sum _{i=1}^{k}d_{i}\leq k(k-1)+\sum _{i=k+1}^{n}\min(d_{i},k). \]

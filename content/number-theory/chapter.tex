@@ -1,0 +1,64 @@
+\chapter{数论}
+
+\section{模运算}
+	\kactlimport{ModularArithmetic.h}
+	\kactlimport{ModInverse.h}
+	\kactlimport{ModPow.h}
+	\kactlimport{ModLog.h}
+	\kactlimport{ModSum.h}
+	\kactlimport{ModMulLL.h}
+	\kactlimport{ModSqrt.h}
+
+\section{素性}
+	\kactlimport{FastEratosthenes.h}
+	\kactlimport{MillerRabin.h}
+	\kactlimport{Factor.h}
+
+\section{整除}
+	\kactlimport{euclid.h}
+	% \kactlimport{Euclid.java}
+	\kactlimport{CRT.h}
+
+	\subsection{Bézout 等式}
+	对 $a \neq 0$, $b \neq 0$,则 $d=gcd(a,b)$ 是使下式存在整数解的最小正整数
+	$$ax+by=d$$
+	若 $(x,y)$ 是一组解,则全部解为
+	$$\left(x+\frac{kb}{\gcd(a,b)}, y-\frac{ka}{\gcd(a,b)}\right), \quad k\in\mathbb{Z}$$
+
+	\kactlimport{phiFunction.h}
+
+\section{分数}
+	\kactlimport{ContinuedFractions.h}
+	\kactlimport{FracBinarySearch.h}
+
+\section{毕达哥拉斯三元组}
+ 毕达哥拉斯三元组可由下式唯一生成
+ \[ a=k\cdot (m^{2}-n^{2}),\ \,b=k\cdot (2mn),\ \,c=k\cdot (m^{2}+n^{2}), \]
+ 其中 $m > n > 0$,$k > 0$,$m \bot n$,且 $m$、$n$ 一奇一偶。
+
+\section{素数}
+	$p=962592769$ 满足 $2^{21} \mid p-1$,可能有用。哈希用
+	970592641(31 位数)、31443539979727(45 位)、3006703054056749
+	(52 位)。小于 1\,000\,000 的素数有 78498 个。
+
+	原根对任何素数幂 $p^a$ 都存在,除了 $p = 2, a > 2$;共有 $\phi(\phi(p^a))$ 个。
+	对 $p = 2, a > 2$,群 $\mathbb Z_{2^a}^\times$ 同构于 $\mathbb Z_2 \times \mathbb Z_{2^{a-2}}$。
+
+\section{估计}
+	$\sum_{d|n} d = O(n \log \log n)$。
+
+	$n$ 的约数个数:$n < 5e4$ 时至多约 100 个,$n < 1e7$ 时 500 个,$n < 1e10$ 时 2000 个,$n < 1e19$ 时 200\,000 个。
+
+\section{莫比乌斯函数}
+\[
+	\mu(n) = \begin{cases} 0 & n \textrm{ 不是无平方因子数}\\ 1 & n \textrm{ 有偶数个质因子}\\ -1 & n \textrm{ 有奇数个质因子}\\\end{cases}
+\]
+  莫比乌斯反演:
+  \[ g(n) = \sum_{d|n} f(d) \Leftrightarrow f(n) = \sum_{d|n} \mu(d)g(n/d) \]
+  其它有用的形式:
+
+  $ \sum_{d | n} \mu(d) = [ n = 1] $(非常有用)
+
+  $ g(n) = \sum_{n|d} f(d) \Leftrightarrow f(n) = \sum_{n|d} \mu(d/n)g(d)$
+
+ $ g(n) = \sum_{1 \leq m \leq n} f(\left\lfloor\frac{n}{m}\right \rfloor ) \Leftrightarrow f(n) = \sum_{1\leq m\leq n} \mu(m)g(\left\lfloor\frac{n}{m}\right\rfloor)$

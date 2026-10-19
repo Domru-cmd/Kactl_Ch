@@ -1,0 +1,46 @@
+\chapter{杂项}
+
+\section{区间}
+	\kactlimport{IntervalContainer.h}
+	\kactlimport{IntervalCover.h}
+	\kactlimport{ConstantIntervals.h}
+
+\section{杂项算法}
+	\kactlimport{TernarySearch.h}
+	\kactlimport{LIS.h}
+	\kactlimport{FastKnapsack.h}
+
+\section{动态规划}
+	\kactlimport{KnuthDP.h}
+	\kactlimport{DivideAndConquerDP.h}
+
+\section{调试技巧}
+	\begin{itemize}
+		\item \verb@signal(SIGSEGV, [](int) { _Exit(0); });@ 把段错误变成答案错误。
+			类似地可以捕获 SIGABRT(断言失败)与 SIGFPE(除以零)。
+			\verb@_GLIBCXX_DEBUG@ 失败会产生 SIGABRT(gcc 5.4.0 上似乎是 SIGSEGV)。
+		\item \verb@feenableexcept(29);@ 遇到 NaN(\texttt 1)、除零(\texttt 4)、无穷(\texttt 8)与非规格化数(\texttt{16})时终止程序。
+	\end{itemize}
+
+\section{优化技巧}
+	\verb@__builtin_ia32_ldmxcsr(40896);@ 禁用非规格化数(浮点数接近最小值时会慢 20 倍)。
+	\subsection{位运算技巧}
+		\begin{itemize}
+			\item \verb@x & -x@ 是 \texttt{x} 的最低位。
+			\item \verb@for (int x = m; x; ) { --x &= m; ... }@ 遍历 \texttt{m} 的所有子集掩码(不含 \texttt{m} 本身)。
+			\item \verb@c = x&-x, r = x+c; (((r^x) >> 2)/c) | r@ 是 \texttt{x} 之后下一个 1 的个数相同的数。
+			\item \verb@rep(b,0,K) rep(i,0,(1 << K))@ \\ \verb@  if (i & 1 << b) D[i] += D[i^(1 << b)];@ 计算所有子集和。
+		\end{itemize}
+	\subsection{Pragma}
+		\begin{itemize}
+			\item \lstinline{#pragma GCC optimize ("Ofast")} 会让 GCC 自动向量化循环,并更好地优化浮点。
+			\item \lstinline{#pragma GCC target ("avx2")} 可以让向量化代码快一倍,但在老机器上会崩溃。
+			\item \lstinline{#pragma GCC optimize ("trapv")} 遇到整数溢出时终止程序(但非常慢)。
+		\end{itemize}
+	\kactlimport{FastMod.h}
+	\kactlimport{FastInput.h}
+	\kactlimport{BumpAllocator.h}
+	\kactlimport{SmallPtr.h}
+	\kactlimport{BumpAllocatorSTL.h}
+	% \kactlimport{Unrolling.h}
+	\kactlimport{SIMD.h}
